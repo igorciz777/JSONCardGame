@@ -7,7 +7,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class DeckService {
-    private String url = "https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=6";
+    private String url;
+    private int deckCount;
+
+    DeckService(int deckCount){
+        this.deckCount = deckCount;
+        this.url = "https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=" + deckCount;
+    }
 
     private String getDeckID() throws ParseException, IOException {
         HTTPConnector connector = new HTTPConnector(new URL(url));
@@ -19,7 +25,7 @@ public class DeckService {
     }
     public CardDeck getCardDeck() throws IOException, ParseException {
         CardDeck deck = new CardDeck();
-        URL requestUrl = new URL("https://deckofcardsapi.com/api/deck/" + getDeckID() + "/draw/?count=312");
+        URL requestUrl = new URL("https://deckofcardsapi.com/api/deck/" + getDeckID() + "/draw/?count=" + (deckCount * 52));
 
         HTTPConnector connector = new HTTPConnector(requestUrl);
         ParseToJSON parser = new ParseToJSON(connector.contentToString());

@@ -45,4 +45,13 @@ public class Card {
     public void setSuit(String suit) {
         this.suit = suit;
     }
+
+    @Override
+    public String toString() {
+        return "Card{" +
+                "code='" + code + '\'' +
+                ", value='" + value + '\'' +
+                ", suit='" + suit + '\'' +
+                '}';
+    }
 }
