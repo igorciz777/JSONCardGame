@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException, ParseException {
-        App app = new App();
-        app.menu();
+        Game game = new Game();
+        game.start();
     }
 }
