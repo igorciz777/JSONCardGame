@@ -1,6 +1,6 @@
 # JSONCardGame
 ## A game of simplified blackjack using a public API generating card decks
-This is a game written in Java with an use of a JSON Parser and Deck of Cards API.
+This is a game written in Java 14 with an use of a JSON Parser and Deck of Cards API.
 
 Link to API: https://deckofcardsapi.com/
 
