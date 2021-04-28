@@ -40,4 +40,10 @@ public class DeckService {
         }
         return deck;
     }
+    public CardDeck reshuffleDeck() throws IOException, ParseException {
+        URL requestUrl = new URL("https://deckofcardsapi.com/api/deck/"+ getDeckID() +"/shuffle/");
+        HTTPConnector connector = new HTTPConnector(requestUrl);
+
+        return getCardDeck();
+    }
 }

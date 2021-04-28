@@ -9,17 +9,30 @@ public class Game {
     private DeckService deckService;
     private CardDeck deck;
     private int counter;
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
     private List<Card> playerCardList;
     private List<Card> dealerCardList;
     private int playerMoney;
     private int playerBet;
+    private int roundCounter=0;
+    private int winCounter=0;
+    private int loseCounter=0;
+
 
     public void start() throws IOException, ParseException {
         System.out.println("How many decks of cards?:");
         startNewGame(scanner.nextInt());
         System.out.println("Current money: "+getPlayerMoney());
         startRound(getPlayerBet());
+    }
+    public void quit(){
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("Game Over!");
+        System.out.println("Money: "+getPlayerMoney());
+        System.out.println("Rounds played: "+roundCounter);
+        System.out.println("Rounds won: "+winCounter);
+        System.out.println("Rounds lost: "+loseCounter);
+        System.out.println("---------------------------------------------------------------------------");
     }
     private void startNewGame(int deckCount) throws IOException, ParseException {
         deckService = new DeckService(deckCount);
@@ -35,28 +48,32 @@ public class Game {
         dealerCardList = new ArrayList<>();
     }
     private void startRound(int bet){
+        roundCounter++;
         clearLists();
         playerBet = bet;
         setPlayerMoney(playerMoney - playerBet);
+        checkIfShuffle();
         playerCardList.add(drawCard());
         playerCardList.add(drawCard());
         dealerCardList.add(drawCard());
         dealerCardList.add(drawCard());
         if(getPlayerValue() >= 21 || getDealerValue() >= 21){
+            printInfo();
             checkWin();
         }else{continueRound();}
     }
     private void playerHit(){
+        checkIfShuffle();
         playerCardList.add(drawCard());
-        printInfo();
         if(getPlayerValue() >= 21){
+            printInfo();
             checkWin();
         }else{
             continueRound();
         }
     }
     private void playerStand(){
-        if(getPlayerValue() < getDealerValue()){
+        if(getPlayerValue() <= getDealerValue()){
             System.err.println("Cant stand");
             playerHit();
         }else {
@@ -64,6 +81,7 @@ public class Game {
         }
     }
     private void dealerHit(){
+        checkIfShuffle();
         dealerCardList.add(drawCard());
         printInfo();
         if(getDealerValue() >= 21){
@@ -86,15 +104,18 @@ public class Game {
                 .sum();
     }
     private void printInfo(){
+        System.out.println("---------------------------------------------------------------------------");
         System.out.println("Dealer cards:");
         dealerCardList.forEach(card -> System.out.println(card.getValue() + " " + card.getSuit()));
         System.out.println("Total value: " + getDealerValue());
-        System.out.println("######################################");
+        System.out.println("---------------------------------------------------------------------------");
         System.out.println("Your cards:");
         playerCardList.forEach(card -> System.out.println(card.getValue() + " " + card.getSuit()));
         System.out.println("Total value: " +  + getPlayerValue());
-        System.out.println("######################################");
+        System.out.println("---------------------------------------------------------------------------");
         System.out.println("Your money: " + getPlayerMoney());
+        System.out.println("Cards in deck remaining: " + (deck.getCardDeckList().size() - counter));
+        System.out.println("---------------------------------------------------------------------------");
     }
 
     public int getPlayerMoney() {
@@ -109,34 +130,51 @@ public class Game {
         return scanner.nextInt();
     }
     private void canContinue(){
-        if(deck.getCardDeckList().size() > 4 && getPlayerMoney() > 0){
+        if(getPlayerMoney() > 0){
             startRound(getPlayerBet());
         }
         else{
-            System.out.println("Game over!");
+            quit();
+        }
+    }
+    private void checkIfShuffle() {
+        if((deck.getCardDeckList().size() - counter) <= 4){
+            System.out.println("Reshuffling the deck!");
+            counter=0;
+            try {
+                deck = deckService.reshuffleDeck();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
     private void checkWin(){
         if(getPlayerValue() > 21 || (getPlayerValue() < getDealerValue() && getDealerValue() <= 21)){
             System.err.println("You lose!");
+            loseCounter++;
             System.out.println("Your money: "+getPlayerMoney());
         }
         else if(getPlayerValue() == 21 || getDealerValue() > 21 || getPlayerValue() > getDealerValue()){
             System.out.println("You win!");
+            winCounter++;
             playerMoney += playerBet * 2;
             System.out.println("Your money: "+getPlayerMoney());
         }
         canContinue();
     }
     private void continueRound() {
+        checkIfShuffle();
         printInfo();
-        System.out.println("Stand or hit?");
+        System.out.println("STAND,HIT or QUIT game?");
         switch (scanner.next().toUpperCase()) {
             case "STAND":
                 playerStand();
                 break;
             case "HIT":
                 playerHit();
+                break;
+            case "QUIT":
+                quit();
                 break;
             default:
                 System.out.println("Wrong option, try again");
